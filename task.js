@@ -1,16 +1,15 @@
 const allTasks = document.getElementById('all-tasks');
 const add = document.getElementById('add');
 
-// load saved tasks
-const alTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+// Load saved tasks
+let alTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-// display function
+// Display function
 const displayTasks = () => {
     let html = "";
-
     alTasks.forEach((item, index) => {
         html += `
-            <div class="text-primary p-2 m-2 rounded">
+            <div class="text-primary p-2 m-2 rounded" style="${item.completed ? 'text-decoration: line-through; opacity:0.6;' : ''}">
                 <strong>${item.task}</strong><br>
                 ${item.date} | ${item.time} | ${item.duration}
                 <button class="del btn btn-danger text-white ms-2" data-index="${index}">
@@ -22,24 +21,13 @@ const displayTasks = () => {
             </div>
         `;
     });
-
     allTasks.innerHTML = html;
-
-    const deleteButtons = document.querySelectorAll('.del');
-    deleteButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const idx = e.currentTarget.getAttribute('data-index');
-            alTasks.splice(idx, 1);  // remove from array
-            localStorage.setItem('tasks', JSON.stringify(alTasks)); // update storage
-            displayTasks(); // re-render
-        });
-    });
 };
 
-// show tasks on load
+// Show tasks on load
 displayTasks();
 
-// add new task
+// Add new task
 add.addEventListener('click', () => {
     const task = document.getElementById('task').value;
     const date = document.getElementById('date').value;
@@ -48,18 +36,33 @@ add.addEventListener('click', () => {
 
     if (task.trim() === "") return;
 
-    // ✅ FIX: add alerted flag
-    alTasks.push({ task, date, time, duration, alerted: false });
-
+    alTasks.push({ task, date, time, duration, alerted: false, completed: false });
     localStorage.setItem('tasks', JSON.stringify(alTasks));
-
     displayTasks();
 });
 
-// alarm sound
-const alarmSound = new Audio("fire_alarm.mp3");
+// Event delegation for delete and complete buttons
+allTasks.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const index = btn.dataset.index;
 
-// ✅ IMPORTANT: unlock audio properly
+    if (btn.classList.contains('del')) {
+        alTasks.splice(index, 1); // remove task
+        localStorage.setItem('tasks', JSON.stringify(alTasks));
+        displayTasks();
+    }
+
+    if (btn.classList.contains('complete')) {
+        alTasks[index].completed = true; // mark as completed
+        localStorage.setItem('tasks', JSON.stringify(alTasks));
+        displayTasks();
+        alert(`✅ Task completed: ${alTasks[index].task}`);
+    }
+});
+
+// Alarm sound
+const alarmSound = new Audio("fire_alarm.mp3");
 let audioUnlocked = false;
 
 document.body.addEventListener('click', () => {
@@ -75,7 +78,7 @@ document.body.addEventListener('click', () => {
     }
 });
 
-// alarm checker
+// Alarm checker
 const checkAlarm = () => {
     const now = new Date();
 
@@ -85,23 +88,15 @@ const checkAlarm = () => {
     const currentTime = `${currentHours}:${currentMinutes}`;
 
     alTasks.forEach(item => {
-
-        // ✅ FIX: make sure alerted exists
         if (item.alerted === undefined) item.alerted = false;
 
         if (item.time === currentTime && !item.alerted) {
-
             console.log("ALARM TRIGGERED 🔔");
 
             alarmSound.currentTime = 0;
-
             alarmSound.play()
-                .then(() => {
-                    console.log("Playing sound ✅");
-                })
-                .catch(err => {
-                    console.log("Audio blocked ❌", err);
-                });
+                .then(() => console.log("Playing sound ✅"))
+                .catch(err => console.log("Audio blocked ❌", err));
 
             item.alerted = true;
         }
@@ -110,5 +105,5 @@ const checkAlarm = () => {
     localStorage.setItem('tasks', JSON.stringify(alTasks));
 };
 
-// check every second
+// Check every second
 setInterval(checkAlarm, 1000);

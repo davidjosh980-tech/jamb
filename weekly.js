@@ -1,24 +1,48 @@
-const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+const dailyTasksContainer = document.getElementById('weekly-tasks');
 
-let html = "";
+// Function to render daily tasks
+const renderDailyTasks = () => {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    let html = "";
 
-tasks.forEach(item => {
-    if (item.duration === "weekly") {
-        html += `
-            <div class="bg-dark text-white p-2 m-2 d-flex flex-row align-items-center rounded">
-                <strong>${item.task}</strong>
-                ${item.date} | ${item.time}
-                <div style="margin-right: 10px;">
-                    <button class="del btn btn-danger text-white ms-2">
+    tasks.forEach((item, index) => {
+        if (item.duration === "weekly") {
+            html += `
+                <div class="text-primary p-2 m-2 rounded">
+                    <strong>${item.task}</strong><br>
+                    ${item.date} | ${item.time} | ${item.duration}
+                    <button class="del btn btn-danger text-white ms-2" data-index="${index}">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
-                    <button class="complete btn btn-success ms-2">
+                    <button class="complete btn btn-success ms-2" data-index="${index}">
                         <i class="fa-solid fa-check"></i>
                     </button>
                 </div>
-            </div>
-        `;
+            `;
+        }
+    });
+
+    dailyTasksContainer.innerHTML = html;
+};
+
+// Initial render
+renderDailyTasks();
+
+// Event delegation for delete and complete buttons
+dailyTasksContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const index = btn.dataset.index;
+
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    if (btn.classList.contains('del')) {
+        tasks.splice(index, 1);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderDailyTasks();
+    }
+
+    if (btn.classList.contains('complete')) {
+        alert(`✅ Task completed: ${tasks[index].task}`);
     }
 });
-
-document.getElementById('weekly-tasks').innerHTML = html;

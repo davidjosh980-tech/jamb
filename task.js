@@ -8,15 +8,15 @@ const alTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 const displayTasks = () => {
     let html = "";
 
-    alTasks.forEach(item => {
+    alTasks.forEach((item, index) => {
         html += `
             <div class="text-primary p-2 m-2 rounded">
                 <strong>${item.task}</strong><br>
                 ${item.date} | ${item.time} | ${item.duration}
-                <button class="del btn btn-danger text-white ms-2">
+                <button class="del btn btn-danger text-white ms-2" data-index="${index}">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
-                <button class="complete btn btn-success ms-2">
+                <button class="complete btn btn-success ms-2" data-index="${index}">
                     <i class="fa-solid fa-check"></i>
                 </button>
             </div>
@@ -24,6 +24,16 @@ const displayTasks = () => {
     });
 
     allTasks.innerHTML = html;
+
+    const deleteButtons = document.querySelectorAll('.del');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = e.currentTarget.getAttribute('data-index');
+            alTasks.splice(idx, 1);  // remove from array
+            localStorage.setItem('tasks', JSON.stringify(alTasks)); // update storage
+            displayTasks(); // re-render
+        });
+    });
 };
 
 // show tasks on load

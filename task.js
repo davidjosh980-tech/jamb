@@ -6,22 +6,64 @@ let alTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
 // Display function
 const displayTasks = () => {
-    let html = "";
-    alTasks.forEach((item, index) => {
-        html += `
-            <div class="text-primary p-2 m-2 rounded" style="${item.completed ? 'text-decoration: line-through; opacity:0.6;' : ''}">
-                <strong>${item.task}</strong><br>
-                ${item.date} | ${item.time} | ${item.duration}
-                <button class="del btn btn-danger text-white ms-2" data-index="${index}">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                <button class="complete btn btn-success ms-2" data-index="${index}">
-                    <i class="fa-solid fa-check"></i>
-                </button>
+    allTasks.innerHTML = "";
+
+    if (alTasks.length === 0) {
+        allTasks.innerHTML = `
+            <p class="text-center text-muted mt-3">No tasks yet 😌</p>
+        `;
+        return;
+    }
+
+    alTasks.forEach((task, index) => {
+        const div = document.createElement("div");
+
+        div.className = `card p-3 mb-3 shadow-sm border-0 ${
+            task.completed ? "bg-light opacity-75" : ""
+        }`;
+
+        div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                
+                <div>
+                    <h6 class="mb-1 ${task.completed ? "text-decoration-line-through text-muted" : ""}">
+                        ${task.task}
+                    </h6>
+
+                    <small class="text-muted">
+                        📅 ${task.date || "No date"} |
+                        ⏰ ${task.time || "No time"}
+                    </small><br>
+
+                    <span class="badge ${
+                        task.duration === "Daily" ? "bg-primary" :
+                        task.duration === "Weekly" ? "bg-success" :
+                        task.duration === "Monthly" ? "bg-warning text-dark" :
+                        "bg-secondary"
+                    } mt-1">
+                        ${task.duration || "No duration"}
+                    </span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    ${
+                        !task.completed
+                        ? `<button class="btn btn-sm btn-success complete" data-index="${index}">
+                            <i class="fas fa-check"></i>
+                           </button>`
+                        : ""
+                    }
+
+                    <button class="btn btn-sm btn-outline-danger del" data-index="${index}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+
             </div>
         `;
+
+        allTasks.appendChild(div);
     });
-    allTasks.innerHTML = html;
 };
 
 // Show tasks on load
@@ -39,6 +81,11 @@ add.addEventListener('click', () => {
     alTasks.push({ task, date, time, duration, alerted: false, completed: false });
     localStorage.setItem('tasks', JSON.stringify(alTasks));
     displayTasks();
+
+    document.getElementById('task').value = "";
+    document.getElementById('date').value = "";
+    document.getElementById('time').value = "";
+    document.getElementById('duration').selectedIndex = 0;
 });
 
 // Event delegation for delete and complete buttons

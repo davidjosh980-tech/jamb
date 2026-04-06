@@ -1,11 +1,27 @@
-body{
-    background-color: blue;
+body {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
 }
-.all{
-    height: px;
+
+.card {
+    border-radius: 20px;
 }
-#all{
-    text-decoration: underline;
-    font-size: 40px;
-    width: 32px;
+
+input, select {
+    border-radius: 10px !important;
+}
+
+button {
+    border-radius: 10px !important;
+}
+
+#all-tasks {
+    margin-top: 20px;
+}
+
+/* Hover effect for tasks */
+.card:hover {
+    transform: scale(1.02);
+    transition: 0.2s;
 }
